@@ -2,11 +2,8 @@
 Monitor the execution status of Plugin FluxMonitor and notify Slack if a problem occurs.
 This program runs as a pm2 process.
 ## premise
-Get the webhook URL to use Slack's incoming webhook.
-
-
-Please see below for how to register for Slack.
-
+Get the webhook URL to use Slack's incoming webhook.<br><br>
+Please see below for how to register for Slack.<br>
 https://qiita.com/11ppm/private/c23f1bf19043fa6e3afb
 
 ## procedure
@@ -26,13 +23,13 @@ chmod +x FluxJobMonit_Slack.sh
 ```
 nano slack.conf
 ```
+Note : Please set the webhook URL in the following parameters.<br>
+```SLACK_WEBHOOK_URL="YOUR_WEBHOOK_URL"```
 
 ### PostgreSQL permission settings
-Set permissions to connect to PostgreSQL without using the sudo command.<br>
-NOTICE : Edit your login password.<br>
-e.g.)NEW_PASSWORD
+Set permissions to connect to PostgreSQL without using the sudo command.
 ```
-sudo -u postgres -i psql -c "CREATE ROLE \"$(whoami)\" LOGIN ENCRYPTED PASSWORD 'NEW_PASSWORD';"
+sudo -u postgres -i psql -c "CREATE ROLE \"$(whoami)\" LOGIN;"
 sudo -u postgres -i psql -c "ALTER ROLE \"$(whoami)\" WITH LOGIN;"
 sudo -u postgres -i psql -c "GRANT USAGE ON SCHEMA public To \"$(whoami)\";"
 sudo -u postgres -i psql -d plugin_mainnet_db -c "GRANT SELECT ON ALL TABLES IN SCHEMA public TO \"$(whoami)\";"
