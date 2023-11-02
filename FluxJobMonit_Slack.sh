@@ -48,7 +48,7 @@ while true; do
                 job_spec_error="$(psql -d plugin_mainnet_db -t -c "SELECT description FROM job_spec_errors WHERE updated_at>='${pre_det[${job_id}]}' AND job_id= '${job_id}';" 2> /dev/null)"
                 if [ "${job_spec_error}" != "" ]; then
                     #Send Messege
-                    post_to_slack "${dsp_date} : $MONITOR_NAME" "${job_name[${job_id}]}" "warning" "Error occurred!!" "${job_spec_error}" "${exe_date}"
+                    post_to_slack "${dsp_date} : $MONITOR_NAME" "${job_name[${job_id}]}" "danger" "JOB Error occurred!!" "${job_spec_error}" "${exe_date}"
                 fi
                 #Last status update
                 pre_det[${job_id}]="${exe_date}"
