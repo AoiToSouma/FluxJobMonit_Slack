@@ -1,4 +1,6 @@
 # FluxJobMonit_Slack
+[README Japanese](https://github.com/AoiToSouma/FluxJobMonit_Slack/blob/main/README_jp.md)
+
 Monitor the execution status of Plugin FluxMonitor and notify Slack if a problem occurs.
 This program runs as a pm2 process.
 ## premise

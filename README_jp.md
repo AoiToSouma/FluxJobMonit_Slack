@@ -1,4 +1,6 @@
 # FluxJobMonit_Slack
+[README English](https://github.com/AoiToSouma/FluxJobMonit_Slack/blob/main/README.md)
+
 Plugin FluxMonitorの実行状況を監視し、問題が発生した場合はSlackに通知します。
 このプログラムは pm2 プロセスとして実行されます。
 
@@ -24,24 +26,24 @@ chmod +x FluxJobMonit_Slack.sh
 ```
 nano slack.conf
 ```
-#### slack.confの説明
-Flux Monitorを健全に保つための通知機能を提供します。
-問題が発生した場合、内容はSlackに通知され、Validatorは即座に問題の発生を認識できます。
+### slack.confの説明
+Flux Monitorを健全に保つための通知機能を提供します。<br>
+問題が発生した場合、内容はSlackに通知され、Validatorは即座に問題の発生を認識できます。<br>
 下記の設定を適切に行い、各種監視機能を有効化してください。
-##### 0.通知のための基本設定
+### 0.通知のための基本設定
 |設定項目|項目の説明|
 |---|---|
 |SLACK_WEBHOOK_URL|Slackのwebhook URLを指定|
 |MONITOR_NAME|通知に表示するサーバ名|
 |POLLING_INTERVAL|監視間隔（秒）<br>連続実行の負荷を下げるためのsleep時間|
 
-##### 1.JOBで発生したエラー情報をPostgreSQLから検出する機能
+### 1.JOBで発生したエラー情報をPostgreSQLから検出する機能
 前回のチェック以降に発生した各JOBのエラーを検出できます。
 |設定項目|項目の説明|
 |---|---|
 |DB_ERROR_TIMER|DB(テーブル名：job_spec_errors）からエラーレコードを検出する間隔（秒）<br>0を指定した場合、通知は無効|
 
-##### 2.Plugin Nodeで発生した種々のエラーをログファイルから検出する機能
+### 2.Plugin Nodeで発生した種々のエラーをログファイルから検出する機能
 前回のチェック以降にログファイルに出力されたエラーメッセージを検出できます。<br>
 下記のワードが含まれている場合にエラーとして検出し、結果をファイルに出力します。<br>
  [検索ワード]<br>
@@ -58,7 +60,7 @@ Flux Monitorを健全に保つための通知機能を提供します。
 |LOG_DIR|エラーログを出力するディレクトリ<br>LOG_ERROR_TIMER が0以外の場合は必須|
 |ERR_LOG_PREFIX|作成するエラー ログの接頭辞<br>LOG_ERROR_TIMER が0以外の場合は必須|
 
-##### 3.JOB実行の停滞を検知する機能
+### 3.JOB実行の停滞を検知する機能
 最新のJOBが実行されてから経過時間をチェックし、設定したしきい値を超えていた場合に通知します。<br>
 チェックする間隔と、しきい値の2つのパラメータで監視を行います。<br>
 しきい値はFlux MonitorのidleTimerPeriod(またはdrumbeatSchedule)+maxTaskDurationの合計時間以上を推奨します。
@@ -67,14 +69,14 @@ Flux Monitorを健全に保つための通知機能を提供します。
 |ROUND_STAGNATION_TIMER|ラウンド停滞通知間隔（秒）<br>最新のJOBラウンドが実行されてからSTAGNATION_THRESHOLDの時間を経過した場合に通知<br>0を指定した場合、通知は無効|
 |STAGNATION_THRESHOLD|最新のJOBラウンドが実行されてからの経過時間のしきい値<br>IdleTimer+maxTaskDuration 相当の時間を想定<br>ROUND_STAGNATION_TIMER が0以外の場合は必須|
 
-##### 4.JOB実行状況を定期的に通知する機能
+### 4.JOB実行状況を定期的に通知する機能
 エラーに関係なく、最新のJOBの処理IDを通知します。<br>
 健全なNodeほどエラー通知がないため、定期的に通知することで死活監視の役目を負います。<br>
 |設定項目|項目の説明|
 |---|---|
 |PERIODIC_NOTICE_TIMER|定期的なジョブ実行状況通知 (秒)<br>ジョブの停止にかかわらずラウンドを通知<br>0を指定した場合、通知は無効|
 
-##### 5.Nodeアドレスの残高を通知する機能
+### 5.Nodeアドレスの残高を通知する機能
 Nodeアドレスの残高(XDC)が設定したしきい値を下回った際に通知します。<br>
 残高が不足するとオンチェーン操作ができなくなるため、適切な補充を促します。<br>
 |設定項目|項目の説明|
