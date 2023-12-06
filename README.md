@@ -1,15 +1,15 @@
-# pli_fm_slack
+# FluxJobMonit_Slack
 Monitor the execution status of Plugin FluxMonitor and notify Slack if a problem occurs.
 This program runs as a pm2 process.
 ## premise
-Get the webhook URL to use Slack's incoming webhook.<br><br>
+Get the webhook URL to use Slack's Incoming Webhooks.<br><br>
 Please see below for how to register for Slack.<br>
 https://qiita.com/11ppm/private/c23f1bf19043fa6e3afb
 
 ## procedure
-### Installing jq package
+### Installing jq, bc package
 ```
-sudo apt install jq
+sudo apt install jq bc
 ```
 ### git clone
 ```
@@ -23,8 +23,7 @@ chmod +x FluxJobMonit_Slack.sh
 ```
 nano slack.conf
 ```
-Note : Please set the webhook URL in the following parameters.<br>
-```SLACK_WEBHOOK_URL="YOUR_WEBHOOK_URL"```
+Read the instructions in the file and set your preferences.
 
 ### PostgreSQL permission settings
 Set permissions to connect to PostgreSQL without using the sudo command.
