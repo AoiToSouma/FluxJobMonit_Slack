@@ -25,7 +25,11 @@ chmod +x FluxJobMonit_Slack.sh
 ```
 nano slack.conf
 ```
-Read the instructions in the file and set your preferences.
+Read the instructions in the file and set your preferences.<br><br>
+If you want to detect errors from the pm2 log, execute the command below and enter the string to be detected.
+```
+nano fm_err_pattern.txt
+```
 
 ### PostgreSQL permission settings
 Set permissions to connect to PostgreSQL without using the sudo command.
