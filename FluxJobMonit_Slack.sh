@@ -110,7 +110,7 @@ while true; do
                 #Supports log rotation
                 pre_line=1
             fi
-            tail -n +"${pre_line}" ${PLI_LOG_FILE} | grep -f ${GREP_PATTERN_FILE} >${file_name}
+            tail -n +"${pre_line}" ${PLI_LOG_FILE} | grep --line-buffered -f ${GREP_BLACK_FILE} | grep --line-buffered -v -f ${GREP_WHITE_FILE} >${file_name}
             if [ ! -s $file_name ]; then
                 #No errors detected
                 rm ${file_name}

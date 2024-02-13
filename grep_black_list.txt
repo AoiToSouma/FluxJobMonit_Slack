@@ -1,0 +1,8 @@
+ERROR
+fail
+0x prefix
+call failed
+under min gas price
+Not authorized sender
+Dial failed: EVM Node is unreachable
+BLOCK_HISTORY_ESTIMATOR_BLOCK_DELAY

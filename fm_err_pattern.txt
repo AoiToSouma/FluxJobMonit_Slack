@@ -1,3 +1,0 @@
-ERROR
-fail
-0x Prefix

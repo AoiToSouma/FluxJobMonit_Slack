@@ -26,10 +26,16 @@ chmod +x FluxJobMonit_Slack.sh
 nano slack.conf
 ```
 Read the instructions in the file and set your preferences.<br><br>
-If you want to detect errors from the pm2 log, execute the command below and enter the string to be detected.
+If you want to detect errors from pm2 logs, define them using blacklists and whitelists.
 ```
-nano fm_err_pattern.txt
+nano grep_black_list.txt
 ```
+Blacklists pick up a wide range of errors.
+```
+nano grep_white_list.txt
+```
+Even among messages extracted using the blacklist, <br>
+messages that contain other words that do not need to be detected can be excluded using the whitelist.
 
 ### PostgreSQL permission settings
 Set permissions to connect to PostgreSQL without using the sudo command.
