@@ -18,6 +18,10 @@ post_to_slack(){
 WORK_DIR=$(cd $(dirname $0);pwd)
 source $WORK_DIR/slack.conf
 
+# Start notification
+start_date=$(date +"%Y-%m-%dT%T")
+post_to_slack "${start_date} : $MONITOR_NAME" "" "good" "FluxJobMonit Start" ""
+
 while true; do
     #Current time
     exe_date=$(date +"%Y-%m-%d %T")
