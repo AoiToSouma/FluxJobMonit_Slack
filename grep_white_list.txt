@@ -1,4 +1,2 @@
-cat exclusion.txt 
 NO_ERROR
 session missing or expired, please login again pg
-
