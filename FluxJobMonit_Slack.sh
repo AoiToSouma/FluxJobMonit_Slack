@@ -123,6 +123,14 @@ while true; do
                 if "$LOG_ERROR_NOTICE" ; then
                     post_to_slack "${dsp_date} : $MONITOR_NAME" "${job_name[${job_id}]}" "danger" "Detect Error Log" "logfile : ${file_name}"
                 fi
+                #RPC error check
+                if "$RPC_ERROR_NOTICE" ; then
+                    rpc_error_cnt=$(grep -c "${RPC_ERROR_MSG}" $file_name)
+                    if [ $(( rpc_error_cnt )) -gt $(( RPC_ERR_THRESHOLD )) ]; then
+                        #Send Message
+                        post_to_slack "${dsp_date} : $MONITOR_NAME" "" "danger" "Detect RPC Error" "Error Count : ${rpc_error_cnt}"
+                    fi
+                fi
             fi
             pre_line=${cur_line}
             pre_let="${exe_date}"

@@ -60,6 +60,8 @@ nano grep_white_list.txt
 ブラックリストで抽出したメッセージの中でも、検知不要な別の単語を含むものはホワイトリストで除外できます。<br>
 <br>
 ファイルだけ定期的に出力し、通知は行わない設定も可能です。
+<br>
+エラーログ検知を行っている場合、RPCエラーが指定回数を超えてログ出力された場合に通知することが可能です。
 |設定項目|項目の説明|
 |---|---|
 |LOG_ERROR_TIMER|ログファイルからエラーメッセージを検出する間隔 (秒)<br>前回確認した以降にエラーログが発生している場合に、検出したログをファイルに記録<br>0を指定した場合、通知は無効|
@@ -67,6 +69,11 @@ nano grep_white_list.txt
 |PLI_LOG_FILE|検索対象のログファイル<br>LOG_ERROR_TIMER が0以外の場合は必須|
 |LOG_DIR|エラーログを出力するディレクトリ<br>LOG_ERROR_TIMER が0以外の場合は必須|
 |ERR_LOG_PREFIX|作成するエラー ログの接頭辞<br>LOG_ERROR_TIMER が0以外の場合は必須|
+|RPC_ERROR_NOTICE|RPCエラー回数超過時に通知するかどうか(trueまたはfalse)<br>LOG_ERROR_TIMERが0でない場合のみ有効|
+|RPC_ERROR_MSG|ログからRPCエラーとして抽出するメッセージ<br>デフォルト:Failed to redial RPC node; still unreachable|
+|RPC_ERR_THRESHOLD|RPCエラー発生回数の閾値|
+|RPC_AUTO_CHANGE|RPCエラー発生回数が閾値を超えた場合に、自動でconfig.tomlのRPCを変更するかどうか(trueまたはfalse)<br>trueの場合、RPC_LISTに従って変更する|
+|RPC_LIST|RPCのリスト<br>RPCエラーによる自動変更時に、このリストに従ってRPCを変更する|
 
 ### 3.JOB実行の停滞を検知する機能
 最新のJOBが実行されてから経過時間をチェックし、設定したしきい値を超えていた場合に通知します。<br>
