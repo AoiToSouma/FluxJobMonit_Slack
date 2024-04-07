@@ -35,7 +35,13 @@ Blacklists pick up a wide range of errors.
 nano grep_white_list.txt
 ```
 Even among messages extracted using the blacklist, <br>
-messages that contain other words that do not need to be detected can be excluded using the whitelist.
+messages that contain other words that do not need to be detected can be excluded using the whitelist.<br>
+<br>
+If you want to detect Network errors from pm2 logs, edit net_err_list.txt.
+```
+nano net_err_list.txt
+```
+The default settings already define error messages for WS/RPC errors and block synchronization delays.
 
 ### PostgreSQL permission settings
 Set permissions to connect to PostgreSQL without using the sudo command.

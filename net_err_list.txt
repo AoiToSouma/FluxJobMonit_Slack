@@ -1,0 +1,10 @@
+Error in new head subscription, unsubscribed
+Subscription was terminated
+RPC Node is unreachable
+No live RPC nodes available
+Log subscriber could not create subscription to Ethereum node
+Failed to redial RPC node; still unreachable: error while dialing websocket
+No EVM primary nodes available: 0/1 nodes are alive
+BalanceMonitor: error getting balance for key*primary http*call failed: Post*: dial tcp*: connect: connection refused
+RPC node returned multiple missing blocks on query for block numbers
+Got very old block with number

@@ -17,6 +17,7 @@ post_to_slack(){
 
 WORK_DIR=$(cd $(dirname $0);pwd)
 source $WORK_DIR/slack.conf
+source $WORK_DIR/.sh/netset.sh
 
 # Start notification
 start_date=$(date +"%Y-%m-%dT%T")
@@ -123,14 +124,6 @@ while true; do
                 if "$LOG_ERROR_NOTICE" ; then
                     post_to_slack "${dsp_date} : $MONITOR_NAME" "${job_name[${job_id}]}" "danger" "Detect Error Log" "logfile : ${file_name}"
                 fi
-                #RPC error check
-                if "$RPC_ERROR_NOTICE" ; then
-                    rpc_error_cnt=$(grep -c "${RPC_ERROR_MSG}" $file_name)
-                    if [ $(( rpc_error_cnt )) -gt $(( RPC_ERR_THRESHOLD )) ]; then
-                        #Send Message
-                        post_to_slack "${dsp_date} : $MONITOR_NAME" "" "danger" "Detect RPC Error" "Error Count : ${rpc_error_cnt}"
-                    fi
-                fi
             fi
             pre_line=${cur_line}
             pre_let="${exe_date}"
@@ -139,8 +132,8 @@ while true; do
     #Notify address balance
     if [ ${ADR_BLC_TIMER} != 0 ]; then
         if [ "${pre_abt}" = "" ]; then
-        #initial
-        pre_abt="${exe_date}"
+            #initial
+            pre_abt="${exe_date}"
         fi
         #Elapsed time since last time
         elapsed_time=$(echo $(expr `date -d"${exe_date}" +%s` - `date -d"${pre_abt}" +%s`))
@@ -154,6 +147,63 @@ while true; do
                 post_to_slack "${dsp_date} : $MONITOR_NAME" "${job_name[${job_id}]}" "warning" "Balance below threshold" "${node_balance_primary}XDC"
                 pre_abt="${exe_date}"
             fi
+        fi
+    fi
+
+    #Network Error Check
+    if [ ${NET_ERR_NOTICE_TIMER} != 0 ]; then
+        if [ "${pre_nec}" = "" ]; then
+            #initial
+            pre_nec="${exe_date}"
+        fi
+        #Elapsed time since last time
+        elapsed_time=$(echo $(expr `date -d"${exe_date}" +%s` - `date -d"${pre_nec}" +%s`))
+        if [ $(( elapsed_time )) -ge $(( NET_ERR_NOTICE_TIMER )) ]; then
+            #run check script
+            check_err_log
+            if [ $? -ne 0 ]; then
+                #network error occurred
+                if "${NET_AUTO_CHANGE}" ; then
+                    restart_count=$CHANGE_COUNT_LIMIT
+                    restart_result=false
+                    while true
+                    do
+                        #edit config.toml
+                        change_network
+                        if [ $? -ne 0 ]; then
+                            echo "network change failed"
+                            break
+                        fi
+                        pm2 reset NodeStartPM2 > /dev/null 2>&1
+                        pm2 restart NodeStartPM2 > /dev/null 2>&1
+                        check_err_log
+                        if [ $? -eq 0 ]; then
+                            #no error
+                            restart_result=true
+                            break
+                        fi
+                        if [ $restart_count -eq 0 ]; then
+                            break
+                        fi
+                        ((restart_count--))
+                    done
+                    httpurl=$(cat $CONFIG | grep "httpUrl")
+                    wsurl=$(cat $CONFIG | grep "wsUrl")
+                    if "$restart_result" ; then
+                        # Network change success.
+                        post_to_slack "${dsp_date} : $MONITOR_NAME" "" "warning" "Network change success" "current url : ${httpurl}, ${wsurl}"
+                    else
+                        # Network change failed.
+                        post_to_slack "${dsp_date} : $MONITOR_NAME" "" "danger" "Network change failed" "current url : ${httpurl}, ${wsurl}"
+                    fi
+                else
+                    #NET_AUTO_CHANGE is false
+                    httpurl=$(cat $CONFIG | grep "httpUrl")
+                    wsurl=$(cat $CONFIG | grep "wsUrl")
+                    post_to_slack "${dsp_date} : $MONITOR_NAME" "" "danger" "Network error occurred" "current url : ${httpurl}, ${wsurl}"
+                fi
+            fi
+            pre_nec="${exe_date}"
         fi
     fi
     sleep ${POLLING_INTERVAL}

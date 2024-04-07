@@ -1,3 +1,4 @@
+CRIT
 ERROR
 fail
 0x prefix

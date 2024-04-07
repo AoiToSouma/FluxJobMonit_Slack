@@ -1,2 +1,7 @@
 NO_ERROR
 session missing or expired, please login again pg
+Failed to fetch block: RPC node returned a missing
+\[ERROR\] SLOW SQL QUERY
+^primary http.*call failed
+^request failed
+fetchAndSaveHead failed
