@@ -187,8 +187,8 @@ while true; do
                         fi
                         ((restart_count--))
                     done
-                    httpurl=$(cat $CONFIG | grep "httpUrl")
-                    wsurl=$(cat $CONFIG | grep "wsUrl")
+                    httpurl=$(cat $CONFIG | grep "^\s*httpUrl")
+                    wsurl=$(cat $CONFIG | grep "^\s*wsUrl")
                     if "$restart_result" ; then
                         # Network change success.
                         post_to_slack "${dsp_date} : $MONITOR_NAME" "" "warning" "Network change success" "current url : ${httpurl}, ${wsurl}"

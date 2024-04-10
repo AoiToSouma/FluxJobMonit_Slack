@@ -2,14 +2,20 @@
 
 change_network(){
     seq_no=0
-    hit_no=-1
+    hit_no=-1 #Array number of hit list
+    rpc_line_no=0 #Line number of config.toml that was hit(RPC)
+    ws_line_no=0  #Line number of config.toml that was hit(WS)
     max_no=$((${#URL_LIST[@]}-1))
+    rpc_prefix="^\s*httpUrl.*"
+    ws_prefix="^\s*wsUrl.*"
     for var in ${URL_LIST[@]}
     do
         url=(${var//,/ })
-        if grep -q "${url[0]}" $CONFIG && grep -q "${url[1]}" $CONFIG; then
+        if grep -q "${rpc_prefix}${url[0]}" $CONFIG && grep -q "${ws_prefix}${url[1]}" $CONFIG; then
             hit_no=$seq_no
             current_val=(${url[@]})
+            rpc_line_no=$(cat $CONFIG | grep -n "${rpc_prefix}${url[0]}" | cut -f 1 -d ":")
+            ws_line_no=$(cat $CONFIG | grep -n "${ws_prefix}${url[1]}" | cut -f 1 -d ":")
             break
         fi
         ((seq_no++))
@@ -27,7 +33,7 @@ change_network(){
     next_val=(${next_val//,/ })
 
     #edit config.toml
-    sed -i -e "s|${current_val[0]}|${next_val[0]}|g" -e "s|${current_val[1]}|${next_val[1]}|g" $CONFIG
+    sed -i -e "${rpc_line_no} s|${current_val[0]}|${next_val[0]}|g" -e "${ws_line_no} s|${current_val[1]}|${next_val[1]}|g" $CONFIG
     return 0
 }
 
