@@ -37,7 +37,7 @@ while true; do
             pre_rst[${job_id}]="${exe_date}" #previous round stagnation time
             pre_pnt[${job_id}]="${exe_date}" #previous periodic notice time
             #Get JOB name
-            job_name[${job_id}]="$(psql -d plugin_mainnet_db -t -c "SELECT name FROM jobs WHERE pipeline_spec_id = '${job_id}';" 2> /dev/null)"
+            job_name[${job_id}]="$(psql -d plugin_mainnet_db -t -c "SELECT name FROM jobs WHERE id = '${job_id}';" 2> /dev/null)"
             #Get JOB round
             pre_job_round[${job_id}]="$(psql -d plugin_mainnet_db -t -c "SELECT MAX(id) FROM pipeline_runs WHERE pipeline_spec_id = '${job_id}';" 2> /dev/null)"
             #Send Messege
