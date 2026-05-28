@@ -11,13 +11,36 @@
 #---------------------------------------------
 post_to_slack(){
     MES_SLACK=$(jq -n --arg arg1 "$1" --arg arg2 "$2" --arg arg3 "$3" --arg arg4 "$4" --arg arg5 "$5" --arg arg6 "$6" '.text=$arg1 |.attachments[0].pretext=$arg2 | .attachments[0].color=$arg3 | .attachments[0].title=$arg4 | .attachments[0].text=$arg5 | .attachments[0].footer=$arg6 | .attachments[0].footer_icon="https://www.goplugin.co/assets/images/logo.png"')
-    curl -X POST -H 'Content-type: application/json' --data "$MES_SLACK" $SLACK_WEBHOOK_URL 2> /dev/null
+    local http_code
+    http_code=$(curl --max-time 10 -s -o /dev/null -w "%{http_code}" \
+        -X POST -H 'Content-type: application/json' \
+        --data "$MES_SLACK" "$SLACK_WEBHOOK_URL" 2>/dev/null)
+    if [ "${http_code}" != "200" ]; then
+        echo "$(date +"%Y-%m-%dT%T") [WARN] Slack notification failed (HTTP ${http_code})" >&2
+    fi
 }
 
 
 WORK_DIR=$(cd $(dirname $0);pwd)
 source $WORK_DIR/slack.conf
 source $WORK_DIR/.sh/netset.sh
+
+# Startup validation
+if [[ -z "$SLACK_WEBHOOK_URL" || "$SLACK_WEBHOOK_URL" == "YOUR_WEBHOOK_URL" ]]; then
+    echo "ERROR: SLACK_WEBHOOK_URL is not configured in slack.conf." >&2
+    exit 1
+fi
+for _cmd in jq bc psql curl; do
+    command -v $_cmd >/dev/null 2>&1 || { echo "ERROR: Required command '$_cmd' not found." >&2; exit 1; }
+done
+unset _cmd
+
+# PostgreSQL connection/statement timeout
+export PGCONNECT_TIMEOUT=10
+export PGOPTIONS='--statement-timeout=5000'
+
+# Signal handling: notify Slack and exit gracefully on SIGTERM/SIGINT
+trap 'post_to_slack "$(date +"%Y-%m-%dT%T") : $MONITOR_NAME" "" "warning" "FluxJobMonit Stop" "Monitoring stopped." ""; exit 0' SIGTERM SIGINT
 
 # Start notification
 start_date=$(date +"%Y-%m-%dT%T")
@@ -36,6 +59,7 @@ while true; do
             pre_det[${job_id}]="${exe_date}" #previous error polling time
             pre_rst[${job_id}]="${exe_date}" #previous round stagnation time
             pre_pnt[${job_id}]="${exe_date}" #previous periodic notice time
+            pre_det_msg[${job_id}]=""        #last notified error message (for deduplication)
             #Get JOB name
             job_name[${job_id}]="$(psql -d plugin_mainnet_db -t -c "SELECT name FROM jobs WHERE id = '${job_id}';" 2> /dev/null)"
             #Get JOB round
@@ -52,8 +76,14 @@ while true; do
                 #interval exceeded, get JOB ERROR
                 job_spec_error="$(psql -d plugin_mainnet_db -t -c "SELECT description FROM job_spec_errors WHERE updated_at>='${pre_det[${job_id}]}' AND job_id= '${job_id}';" 2> /dev/null)"
                 if [ "${job_spec_error}" != "" ]; then
-                    #Send Messege
-                    post_to_slack "${dsp_date} : $MONITOR_NAME" "${job_name[${job_id}]}" "danger" "JOB Error occurred!!" "${job_spec_error}" "${exe_date}"
+                    #Send Messege only when the error content has changed (deduplication)
+                    if [ "${job_spec_error}" != "${pre_det_msg[${job_id}]}" ]; then
+                        post_to_slack "${dsp_date} : $MONITOR_NAME" "${job_name[${job_id}]}" "danger" "JOB Error occurred!!" "${job_spec_error}" "${exe_date}"
+                        pre_det_msg[${job_id}]="${job_spec_error}"
+                    fi
+                else
+                    #Error cleared: reset cache so the next occurrence will notify
+                    pre_det_msg[${job_id}]=""
                 fi
                 #Last status update
                 pre_det[${job_id}]="${exe_date}"
@@ -122,7 +152,8 @@ while true; do
             else
                 #Send Messege
                 if "$LOG_ERROR_NOTICE" ; then
-                    post_to_slack "${dsp_date} : $MONITOR_NAME" "${job_name[${job_id}]}" "danger" "Detect Error Log" "logfile : ${file_name}"
+                    # job_name is intentionally empty: log error detection is a global check, not per-job
+                    post_to_slack "${dsp_date} : $MONITOR_NAME" "" "danger" "Detect Error Log" "logfile : ${file_name}"
                 fi
             fi
             pre_line=${cur_line}
@@ -144,7 +175,8 @@ while true; do
             node_balance_primary=$(echo ${node_balance_arr[0]} | sed s/ETH:[[:space:]]/''/)
             if [ `echo "$node_balance_primary < $ADR_BLC_THRESHOLD" | bc` == 1 ]; then
                 #Send Messege
-                post_to_slack "${dsp_date} : $MONITOR_NAME" "${job_name[${job_id}]}" "warning" "Balance below threshold" "${node_balance_primary}XDC"
+                # job_name is intentionally empty: balance check is a global check, not per-job
+                post_to_slack "${dsp_date} : $MONITOR_NAME" "" "warning" "Balance below threshold" "${node_balance_primary}XDC"
                 pre_abt="${exe_date}"
             fi
         fi
